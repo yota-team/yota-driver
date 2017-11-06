@@ -12,6 +12,7 @@ import {
 import { connect } from 'react-redux'
 import MapView from 'react-native-maps'
 import { Accelerometer, Gyroscope } from 'react-native-sensors'
+import axios from 'axios'
 
 const accelerationObservable = new Accelerometer({
   updateInterval: 100 // defaults to 100ms
@@ -22,7 +23,7 @@ const accelerationObservable = new Accelerometer({
 //   .map(({ x, y, z }) => x + y + z)
 //   .filter(speed => speed > 1)
 //   .subscribe(speed => alert(`You moved your phone with ${speed}`));
-//
+
 // setTimeout(() => {
 //   accelerationObservable.stop();
 // }, 1000);
@@ -39,10 +40,14 @@ class Home extends React.Component {
   }
 
   render() {
-    alert(JSON.stringify(this.state, null, 2))
     return (
       <View>
-        <Text>gasss</Text>
+        <TouchableHighlight onPress={ () => this.postCurrentPosition() }>
+          <Text>TAP HER TO POST!</Text>
+        </TouchableHighlight>
+        <Text>car_id: {this.state.car_id}</Text>
+      <Text>latitude: {this.state.latitude}</Text>
+    <Text>longitude: {this.state.longitude}</Text>
       </View>
     )
   }
@@ -67,6 +72,24 @@ class Home extends React.Component {
       },
       { enableHighAccuracy: true, timeout: 10000},
     );
+  }
+
+  postCurrentPosition() {
+    axios({
+      method: 'post',
+      url: `http://yota.achim.my.id/positions`,
+      data: {
+        car: this.state.car_id,
+        latitude: this.state.latitude,
+        longitude: this.state.longitude
+      }
+    })
+    .then(response => {
+      alert(JSON.stringify(response, null, 2))
+    })
+    .catch(err => {
+      alert(JSON.stringify(err, null, 2))
+    })
   }
 }
 
