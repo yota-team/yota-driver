@@ -14,20 +14,6 @@ import MapView from 'react-native-maps'
 import { Accelerometer, Gyroscope } from 'react-native-sensors'
 import axios from 'axios'
 
-const accelerationObservable = new Accelerometer({
-  updateInterval: 100 // defaults to 100ms
-})
-
-// // Normal RxJS functions
-// accelerationObservable
-//   .map(({ x, y, z }) => x + y + z)
-//   .filter(speed => speed > 1)
-//   .subscribe(speed => alert(`You moved your phone with ${speed}`));
-
-// setTimeout(() => {
-//   accelerationObservable.stop();
-// }, 1000);
-
 class Home extends React.Component {
   constructor() {
     super()
@@ -54,12 +40,56 @@ class Home extends React.Component {
 
   componentDidMount() {
     this.getCoordinate()
+    this.watchSpeed()
+    // this.watchPosition()
+  }
+
+  watchSpeed() {
+    const accelerationObservable = new Accelerometer({
+      updateInterval: 10000 // defaults to 100ms
+    })
+
+    let lat = this.state.latitude
+    let lng = this.state.longitude
+
+    // Normal RxJS functions
+    accelerationObservable
+      .map(({ x, y, z }) => x + y + z)
+      .filter(speed => speed < 10)
+      .subscribe(speed => {
+        this.getCoordinate()
+        // this.postCurrentPosition()
+        console.log(`You moved your phone with ${speed}`)
+      });
+
+    // setTimeout(() => {
+    //   accelerationObservable.stop();
+    // }, 1000);
+  }
+
+  watchPosition() {
+    navigator.geolocation.watchPosition(
+      (position) => {
+        this.setState({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          error: null
+        })
+        console.log('ini position di watch:', position)
+      },
+      (error) => {
+        this.setState({ error: error.message })
+        console.log(error)
+      },
+      { enableHighAccuracy: true, timeout: 1000}
+    )
   }
 
   getCoordinate() {
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        // alert(JSON.stringify(position.coords))
+        console.log('posisi sekarang:', position)
+        // alert(JSON.stringify(position))
         this.setState({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
@@ -85,10 +115,12 @@ class Home extends React.Component {
       }
     })
     .then(response => {
-      alert(JSON.stringify(response, null, 2))
+      console.log(response)
+      // alert(JSON.stringify(response, null, 2))
     })
     .catch(err => {
-      alert(JSON.stringify(err, null, 2))
+      console.log(err)
+      // alert(JSON.stringify(err, null, 2))
     })
   }
 }
