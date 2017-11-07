@@ -60,17 +60,13 @@ class Home extends React.Component {
         error: null,
         speed: success.coords.speed
       })
-      if (success.speed > 1 && this.state.isActive) {
-        alert(`Your speed > 1 (${success.speed})`)
+      if (this.state.isActive && speed > 3) {
+        alert(`Your speed greater than 3 (${success.coords.speed})`)
       }
-      // console.log('data dari state:', this.state)
-      console.log('data dari watch maps:', success.coords)
+      console.log(success.coords)
     },
     error => {
       console.log(error)
-    },
-    {
-      enableHighAccuracy: true
     })
   }
 
