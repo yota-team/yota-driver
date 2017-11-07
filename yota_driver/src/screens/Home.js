@@ -52,22 +52,25 @@ class Home extends React.Component {
 
   watchPosition() {
     // console.log(navigator.geolocation)
-    navigator.geolocation.watchPosition(success => {
+    navigator.geolocation.watchPosition(position => {
       this.setState({
         date: new Date(),
-        latitude: success.coords.latitude,
-        longitude: success.coords.longitude,
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
         error: null,
-        speed: success.coords.speed
+        speed: position.coords.speed
       })
-      if (this.state.isActive && speed > 3) {
-        alert(`Your speed greater than 3 (${success.coords.speed})`)
+      if (this.state.isActive && position.coords.speed > 1) {
+        // this.postCurrentPosition()
+        alert(`Your speed greater than 1 (${position.coords.speed})`)
+      } else if (position.coords.speed > 1) {
+        alert(`Your speed greater than 1 (${position.coords.speed})`)
       }
-      console.log(success.coords)
+      console.log('ini data dari maps', position)
     },
     error => {
       console.log(error)
-    })
+    }, { enableHighAccuracy: true })
   }
 
   showActivateButton() {
@@ -146,7 +149,7 @@ class Home extends React.Component {
   // }
 
   postCurrentPosition() {
-    this.getCoordinate()
+    // this.getCoordinate()
     axios({
       method: 'post',
       url: `http://yota.achim.my.id/positions`,
