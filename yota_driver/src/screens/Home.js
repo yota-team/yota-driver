@@ -7,7 +7,9 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   TouchableHighlight,
-  Button
+  Button,
+  Image,
+  Modal
 } from 'react-native';
 import { connect } from 'react-redux'
 import MapView from 'react-native-maps'
@@ -35,13 +37,13 @@ class Home extends React.Component {
 
   render() {
     return (
-      <View>
+      <View style={styles.container}>
+        { this.showActivateButton() }
         <Text>is active: { JSON.stringify(this.state.isActive) }</Text>
         <Text>date/time: { this.state.date }</Text>
         <Text>car_id: {this.state.car_id}</Text>
         <Text>latitude: {this.state.latitude}</Text>
         <Text>longitude: {this.state.longitude}</Text>
-        { this.showActivateButton() }
       </View>
     )
   }
@@ -49,27 +51,25 @@ class Home extends React.Component {
   showActivateButton() {
     if (this.state.isActive) {
       return (
-        <Button
-          onPress={() => {
-            return (
-              this.toggleStatusActive()
-            )
-          }}
-          title="disable"
-          color="red"
-        />
+        <View>
+          <TouchableHighlight onPress={ () => this.toggleStatusActive() }>
+            <Image
+              style={{width: 100, height: 100}}
+              source={require('../img/off.png')}
+            />
+          </TouchableHighlight>
+        </View>
       )
     } else {
       return (
-        <Button
-          onPress={() => {
-            return (
-              this.toggleStatusActive()
-            )
-          }}
-          title="enable"
-          color="green"
-        />
+        <View>
+          <TouchableHighlight onPress={ () => this.toggleStatusActive() }>
+            <Image
+              style={{width: 100, height: 100}}
+              source={require('../img/on.png')}
+            />
+          </TouchableHighlight>
+        </View>
       )
     }
   }
@@ -86,12 +86,15 @@ class Home extends React.Component {
     // Normal RxJS functions
     accelerationObservable
       .map(({ x, y, z }) => x + y + z)
-      .filter(speed => speed < 10)
+      .filter(speed => speed > 0)
       .subscribe(speed => {
-        if (this.state.isActive) {
+        if (this.state.isActive && speed < 10) {
           console.log(`You moved your phone with ${speed}`)
+          console.log(`Your data post to yota-API`)
           this.getCoordinate()
           this.postCurrentPosition()
+        } else {
+          console.log(`You moved your phone with ${speed}`)
         }
       });
 
@@ -101,28 +104,28 @@ class Home extends React.Component {
     // }, 1000);
   }
 
-  watchPosition() {
-    navigator.geolocation.watchPosition(
-      (position) => {
-        this.setState({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          error: null
-        })
-        console.log('ini position di watch:', position)
-      },
-      (error) => {
-        this.setState({ error: error.message })
-        console.log(error)
-      },
-      { enableHighAccuracy: true, timeout: 1000}
-    )
-  }
+  // watchPosition() {
+  //   navigator.geolocation.watchPosition(
+  //     (position) => {
+  //       this.setState({
+  //         latitude: position.coords.latitude,
+  //         longitude: position.coords.longitude,
+  //         error: null
+  //       })
+  //       console.log('ini position di watch:', position)
+  //     },
+  //     (error) => {
+  //       this.setState({ error: error.message })
+  //       console.log(error)
+  //     },
+  //     { enableHighAccuracy: true, timeout: 1000}
+  //   )
+  // }
 
   getCoordinate() {
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        console.log('state sekarang:', this.state)
+        // console.log('state sekarang:', this.state)
         // alert(JSON.stringify(position))
         this.setState({
           latitude: position.coords.latitude,
@@ -151,24 +154,21 @@ class Home extends React.Component {
     })
     .then(response => {
       console.log('response axios:', response.data)
-      alert(JSON.stringify(response.data, null, 2))
+      alert(`Your data post to yota-API`)
     })
     .catch(err => {
       console.log('error axios:', err)
-      alert(JSON.stringify(err, null, 2))
+      alert(`error axios:`, JSON.stringify(err, null, 2))
     })
   }
 }
 
 let styles = StyleSheet.create({
   container: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'flex-end',
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#F5FCFF',
   },
   centering: {
     alignItems: 'center',
