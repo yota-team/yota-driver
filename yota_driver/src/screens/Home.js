@@ -13,26 +13,27 @@ import {
 } from 'react-native';
 import { connect } from 'react-redux'
 import MapView from 'react-native-maps'
-import { Accelerometer, Gyroscope } from 'react-native-sensors'
+// import { Accelerometer, Gyroscope } from 'react-native-sensors'
 import axios from 'axios'
 
 class Home extends React.Component {
   constructor() {
     super()
     this.state = {
-      date: JSON.stringify(new Date()),
+      date: new Date(),
       latitude: 0,
       longitude: 0,
       error: null,
       car_id: '59fda4375254c414ec370484',
-      isActive: false
+      isActive: false,
+      speed: 0
     }
   }
 
   componentDidMount() {
-    this.getCoordinate()
-    this.watchSpeed()
-    // this.watchPosition()
+    // this.getCoordinate()
+    // this.watchSpeed()
+    this.watchPosition()
   }
 
   render() {
@@ -40,12 +41,37 @@ class Home extends React.Component {
       <View style={styles.container}>
         { this.showActivateButton() }
         <Text>is active: { JSON.stringify(this.state.isActive) }</Text>
-        <Text>date/time: { this.state.date }</Text>
+        <Text>date/time: { JSON.stringify(this.state.date) }</Text>
         <Text>car_id: {this.state.car_id}</Text>
         <Text>latitude: {this.state.latitude}</Text>
         <Text>longitude: {this.state.longitude}</Text>
+        <Text>speed: {this.state.speed}</Text>
       </View>
     )
+  }
+
+  watchPosition() {
+    // console.log(navigator.geolocation)
+    navigator.geolocation.watchPosition(success => {
+      this.setState({
+        date: new Date(),
+        latitude: success.coords.latitude,
+        longitude: success.coords.longitude,
+        error: null,
+        speed: success.coords.speed
+      })
+      if (success.speed > 1 && this.state.isActive) {
+        alert(`Your speed > 1 (${success.speed})`)
+      }
+      // console.log('data dari state:', this.state)
+      console.log('data dari watch maps:', success.coords)
+    },
+    error => {
+      console.log(error)
+    },
+    {
+      enableHighAccuracy: true
+    })
   }
 
   showActivateButton() {
@@ -78,68 +104,50 @@ class Home extends React.Component {
     this.setState({isActive: !this.state.isActive})
   }
 
-  watchSpeed() {
-    const accelerationObservable = new Accelerometer({
-      updateInterval: 5000 // defaults to 100ms
-    })
+  // watchSpeed() {
+  //   const accelerationObservable = new Accelerometer({
+  //     updateInterval: 100 // defaults to 100ms
+  //   })
+  //
+  //   // Normal RxJS functions
+  //   accelerationObservable
+  //     .map(({ x, y, z }) => x + y + z)
+  //     .filter(speed => speed > 0)
+  //     .subscribe(speed => {
+  //       if (this.state.isActive && speed < 10) {
+  //         console.log(`You moved your phone with ${speed}`)
+  //         console.log(`Your data post to yota-API`)
+  //         this.getCoordinate()
+  //         // this.postCurrentPosition()
+  //       } else {
+  //         console.log(`You moved your phone with ${speed}`)
+  //       }
+  //     });
+  //
+  //   // setTimeout(() => {
+  //   //   accelerationObservable.stop();
+  //   //   console.log('acc.stop() run');
+  //   // }, 1000);
+  // }
 
-    // Normal RxJS functions
-    accelerationObservable
-      .map(({ x, y, z }) => x + y + z)
-      .filter(speed => speed > 0)
-      .subscribe(speed => {
-        if (this.state.isActive && speed < 10) {
-          console.log(`You moved your phone with ${speed}`)
-          console.log(`Your data post to yota-API`)
-          this.getCoordinate()
-          this.postCurrentPosition()
-        } else {
-          console.log(`You moved your phone with ${speed}`)
-        }
-      });
-
-    // setTimeout(() => {
-    //   accelerationObservable.stop();
-    //   console.log('acc.stop() run');
-    // }, 1000);
-  }
-
-  // watchPosition() {
-  //   navigator.geolocation.watchPosition(
+  // getCoordinate() {
+  //   navigator.geolocation.getCurrentPosition(
   //     (position) => {
+  //       // console.log('state sekarang:', this.state)
+  //       // alert(JSON.stringify(position))
   //       this.setState({
   //         latitude: position.coords.latitude,
   //         longitude: position.coords.longitude,
   //         error: null
   //       })
-  //       console.log('ini position di watch:', position)
   //     },
   //     (error) => {
+  //       // alert(JSON.stringify(error))
   //       this.setState({ error: error.message })
-  //       console.log(error)
   //     },
-  //     { enableHighAccuracy: true, timeout: 1000}
-  //   )
+  //     { enableHighAccuracy: true, timeout: 10000},
+  //   );
   // }
-
-  getCoordinate() {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        // console.log('state sekarang:', this.state)
-        // alert(JSON.stringify(position))
-        this.setState({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          error: null
-        })
-      },
-      (error) => {
-        // alert(JSON.stringify(error))
-        this.setState({ error: error.message })
-      },
-      { enableHighAccuracy: true, timeout: 10000},
-    );
-  }
 
   postCurrentPosition() {
     this.getCoordinate()
