@@ -51,13 +51,13 @@ class Home extends React.Component {
         <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 10, backgroundColor: '#343D33', borderRadius: 5, paddingVertical: 20, paddingHorizontal: 50 }}>
 
           <Text style={{ fontWeight: 'bold', color: 'white' }}>Speed:</Text>
-          <Text style={{ fontSize: 30, fontWeight: 'bold', color: 'white' }}>{this.state.speed * 3.6} km/h</Text>
+        <Text style={{ fontSize: 30, fontWeight: 'bold', color: 'white' }}>{(this.state.speed * 3.6).toFixed(2)} km/h</Text>
 
           <Text style={{ marginTop: 15, fontWeight: 'bold', color: 'white' }}>Latitude:</Text>
-          <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'white' }}>{this.state.latitude}</Text>
+        <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'white' }}>{this.state.latitude.toFixed(6)}</Text>
 
           <Text style={{ marginTop: 15, fontWeight: 'bold', color: 'white' }}>Longitude:</Text>
-          <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'white' }}>{this.state.longitude}</Text>
+        <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'white' }}>{this.state.longitude.toFixed(6)}</Text>
 
         </View>
 
@@ -96,11 +96,7 @@ class Home extends React.Component {
         speed: position.coords.speed
       })
       if (this.state.isActive && this.state.speed < 3) {
-        // this.postCurrentPosition()
-        this.refs.modal1.open()
-        setTimeout(() => {
-          this.refs.modal1.close()
-        }, 2000)
+        this.postCurrentPosition()
         console.log(`Your speed lower than 3 m/s (${this.state.speed})`)
       } else if (this.state.speed >= 3) {
         console.log(`Your speed greater than m/s 3 (${this.state.speed})`)
@@ -198,12 +194,15 @@ class Home extends React.Component {
       }
     })
     .then(response => {
+      this.refs.modal1.open()
+      setTimeout(() => {
+        this.refs.modal1.close()
+      }, 2000)
       console.log('response axios:', response.data)
-      alert(JSON.stringify(response.data, null, 2))
+      // alert(JSON.stringify(response.data, null, 2))
     })
     .catch(err => {
       console.log('error axios:', err)
-      alert(`error axios:`, JSON.stringify(err, null, 2))
     })
   }
 }
