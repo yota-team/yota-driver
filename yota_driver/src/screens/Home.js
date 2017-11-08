@@ -50,6 +50,19 @@ class Home extends React.Component {
     )
   }
 
+  // countFiveSeconds() {
+  //   let totalSpeedPerFiveSeconds = 0
+  //   if (this.state.isActive) {
+  //     for (var i = 0; i < 5; i++) {
+  //       setTimeout(function(){ console.log(`iter ${i+1}`) }, 3000);
+  //     }
+  //     if (this.state.isActive && totalSpeedPerFiveSeconds / 5 < 1) {
+  //       // this.postCurrentPosition()
+  //       console.log('should post now!')
+  //     }
+  //   }
+  // }
+
   watchPosition() {
     // console.log(navigator.geolocation)
     navigator.geolocation.watchPosition(position => {
@@ -60,13 +73,15 @@ class Home extends React.Component {
         error: null,
         speed: position.coords.speed
       })
-      if (this.state.isActive && position.coords.speed > 1) {
-        // this.postCurrentPosition()
-        alert(`Your speed greater than 1 (${position.coords.speed})`)
-      } else if (position.coords.speed > 1) {
-        alert(`Your speed greater than 1 (${position.coords.speed})`)
+      if (this.state.isActive && this.state.speed < 1) {
+        this.postCurrentPosition()
+        console.log(`Your speed lower than 1 m/s (${this.state.speed})`)
+        // alert(`Your speed greater than 1 (${this.state.speed})`)
+      } else if (this.state.speed >= 1) {
+        console.log(`Your speed greater than m/s 1 (${this.state.speed})`)
+        // alert(`Your speed greater than 1 (${this.state.speed})`)
       }
-      console.log('ini data dari maps', position)
+      // console.log('ini data dari maps', position)
     },
     error => {
       console.log(error)
@@ -161,7 +176,7 @@ class Home extends React.Component {
     })
     .then(response => {
       console.log('response axios:', response.data)
-      alert(`Your data post to yota-API`)
+      alert(JSON.stringify(response.data, null, 2))
     })
     .catch(err => {
       console.log('error axios:', err)
