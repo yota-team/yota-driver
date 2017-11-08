@@ -2,19 +2,17 @@ import React from 'react'
 import {
   StyleSheet,
   View,
-  Text,
   Dimensions,
   TouchableOpacity,
   ActivityIndicator,
   TouchableHighlight,
   Button,
-  Image,
-  Modal
+  Image
 } from 'react-native';
+import { Text } from 'react-native-elements'
 import { connect } from 'react-redux'
-import MapView from 'react-native-maps'
-// import { Accelerometer, Gyroscope } from 'react-native-sensors'
 import axios from 'axios'
+import Modal from 'react-native-modalbox'
 
 class Home extends React.Component {
   constructor() {
@@ -36,16 +34,40 @@ class Home extends React.Component {
     this.watchPosition()
   }
 
+  showActiveStatus() {
+    if (this.state.isActive) {
+      return <Text h3 style={{color: '#99D83A'}}>ON DRIVING</Text>
+    } else {
+      return <Text h3 style={{color: '#2A589E'}}>START</Text>
+    }
+  }
+
   render() {
     return (
       <View style={styles.container}>
         { this.showActivateButton() }
-        <Text>is active: { JSON.stringify(this.state.isActive) }</Text>
-        <Text>date/time: { JSON.stringify(this.state.date) }</Text>
-        <Text>car_id: {this.state.car_id}</Text>
-        <Text>latitude: {this.state.latitude}</Text>
-        <Text>longitude: {this.state.longitude}</Text>
-        <Text>speed: {this.state.speed}</Text>
+        { this.showActiveStatus() }
+
+        <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 10, backgroundColor: '#343D33', borderRadius: 5, paddingVertical: 20, paddingHorizontal: 50 }}>
+
+          <Text style={{ fontWeight: 'bold', color: 'white' }}>Speed:</Text>
+          <Text style={{ fontSize: 30, fontWeight: 'bold', color: 'white' }}>{this.state.speed * 3.6} km/h</Text>
+
+          <Text style={{ marginTop: 15, fontWeight: 'bold', color: 'white' }}>Latitude:</Text>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'white' }}>{this.state.latitude}</Text>
+
+          <Text style={{ marginTop: 15, fontWeight: 'bold', color: 'white' }}>Longitude:</Text>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'white' }}>{this.state.longitude}</Text>
+
+        </View>
+
+        <Modal
+          style={[styles.modal, styles.modal1]}
+          ref={"modal1"}
+        >
+          <Text style={{ color: '#000' }}>Your position posted.</Text>
+        </Modal>
+
       </View>
     )
   }
@@ -73,15 +95,16 @@ class Home extends React.Component {
         error: null,
         speed: position.coords.speed
       })
-      if (this.state.isActive && this.state.speed < 1) {
-        this.postCurrentPosition()
-        console.log(`Your speed lower than 1 m/s (${this.state.speed})`)
-        // alert(`Your speed greater than 1 (${this.state.speed})`)
-      } else if (this.state.speed >= 1) {
-        console.log(`Your speed greater than m/s 1 (${this.state.speed})`)
-        // alert(`Your speed greater than 1 (${this.state.speed})`)
+      if (this.state.isActive && this.state.speed < 3) {
+        // this.postCurrentPosition()
+        this.refs.modal1.open()
+        setTimeout(() => {
+          this.refs.modal1.close()
+        }, 2000)
+        console.log(`Your speed lower than 3 m/s (${this.state.speed})`)
+      } else if (this.state.speed >= 3) {
+        console.log(`Your speed greater than m/s 3 (${this.state.speed})`)
       }
-      // console.log('ini data dari maps', position)
     },
     error => {
       console.log(error)
@@ -94,8 +117,8 @@ class Home extends React.Component {
         <View>
           <TouchableHighlight onPress={ () => this.toggleStatusActive() }>
             <Image
-              style={{width: 100, height: 100}}
-              source={require('../img/off.png')}
+              style={{width: 100, height: 100, marginBottom: 10}}
+              source={require('../img/on.png')}
             />
           </TouchableHighlight>
         </View>
@@ -105,8 +128,8 @@ class Home extends React.Component {
         <View>
           <TouchableHighlight onPress={ () => this.toggleStatusActive() }>
             <Image
-              style={{width: 100, height: 100}}
-              source={require('../img/on.png')}
+              style={{width: 100, height: 100, marginBottom: 10}}
+              source={require('../img/YOTA-LOGO.png')}
             />
           </TouchableHighlight>
         </View>
@@ -190,7 +213,7 @@ let styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+    backgroundColor: '#fff',
   },
   centering: {
     alignItems: 'center',
@@ -222,6 +245,16 @@ let styles = StyleSheet.create({
     marginVertical: 20,
     backgroundColor: 'transparent',
   },
+  modal: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20
+  },
+  modal1: {
+    height: 70,
+    width: 200,
+    backgroundColor: "#fff"
+  }
 });
 
 const mapStateToProps = (state) => {
